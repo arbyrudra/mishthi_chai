@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mishthi Chai Experience</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+:root {
+  --brand-yellow: #fdb913;  
+  --brand-green: #4cb60d;   
+  --text-main: #333333;     
+  --text-error: #ff0000;    
+  --bg-gradient: radial-gradient(circle, #ffffff 0%, #fff8e1 60%, #faeab8 100%);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  overflow: hidden; background: var(--bg-gradient);
+  font-family: 'Montserrat', sans-serif; color: var(--text-main);
+}
+
+#particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: hidden; }
+.particle { position: absolute; background: var(--brand-yellow); border-radius: 50%; opacity: 0.3; animation: floatUp linear infinite; }
+@keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+
+.section { display: none; width: 100vw; height: 100vh; padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom); position: absolute; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 10; }
+.active { display: flex; }
+
+.lux-box {
+  background: var(--glass-bg); padding: 25px 20px; border-radius: 22px;
+  border: 2px solid var(--brand-yellow); width: 100%; max-width: 360px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(253, 185, 19, 0.15);
+  opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  max-height: 90vh; overflow-y: auto;
+}
+.active .lux-box { opacity: 1; transform: translateY(0); }
+
+.brand-logo { 
+    max-width: 140px; max-height: 80px; margin-bottom: 20px; 
+    display: block; margin-left: auto; margin-right: auto;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+.gold-btn {
+  width: 100%; background: var(--brand-yellow); border: none; padding: 16px;
+  border-radius: 12px; font-weight: 800; cursor: pointer; color: #000;
+  margin-top: 15px; font-size: 15px; letter-spacing: 1px; text-transform: uppercase;
+  transition: transform 0.2s, box-shadow 0.3s; box-shadow: 0 5px 15px rgba(253, 185, 19, 0.3);
+}
+.gold-btn:active { transform: scale(0.97); }
+.gold-btn:disabled { background: #e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; }
+
+.product-btn {
+    background: #fff; border: 2px solid var(--brand-yellow); margin-top: 12px; padding: 15px;
+    border-radius: 12px; width: 100%; text-align: left; display: flex; align-items: center;
+    justify-content: space-between; cursor: pointer; transition: 0.3s;
+}
+.product-btn:hover { background: var(--brand-yellow); transform: translateY(-2px); }
+
+#qr-container {
+    background: #fff; padding: 15px; border-radius: 10px; margin: 15px auto;
+    width: fit-content; border: 2px dashed #333; display: flex; justify-content: center; align-items: center;
+}
+
+.price-details {
+    background: #fff; padding: 0 15px; margin: 15px 0;
+    border-top: 2px dashed #ccc; border-bottom: 2px dashed #ccc;
+    text-align: left;
+}
+.price-line { 
+    display: flex; justify-content: space-between; 
+    margin: 12px 0; font-size: 14px; color: #555; 
+}
+.total-line { 
+    border-top: 1px solid #eee; padding-top: 10px; margin-bottom: 10px;
+    font-weight: 900; font-size: 20px; color: var(--brand-green); 
+}
+
+.pulse-anim { animation: pulse-yellow 2s infinite; }
+@keyframes pulse-yellow { 0% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(253, 185, 19, 0); } 100% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0); } }
+
+input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 10px; border: 1px solid #ddd; background: #f9f9f9; font-size: 16px; outline: none; font-family: 'Montserrat', sans-serif; }
+input:focus { border-color: var(--brand-yellow); background: #fff; }
+
+#wheelContainer { position: relative; margin: 15px 0; }
+#wheelCanvas { width: min(85vw, 340px); height: min(85vw, 340px); border: 6px solid var(--brand-yellow); border-radius: 50%; background: #fff; transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.pointer { width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 24px solid var(--text-main); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 10; }
+
+h1, h2 { margin: 0 0 5px; font-weight: 900; color: var(--text-main); }
+p { margin: 5px 0; line-height: 1.5; color: #555; font-size: 14px; }
+#statusMsg { font-size: 13px; min-height: 18px; color: var(--text-error); font-weight: 700; opacity: 0; transition: opacity 0.3s; }
+
+.loader-line { width: 100%; height: 4px; background: #eee; margin-top: 15px; border-radius: 2px; overflow: hidden; }
+.loader-fill { height: 100%; background: var(--brand-green); width: 0%; transition: width 4s linear; }
+</style>
+</head>
+
+<body>
+
+<div id="particles"></div>
+
+<div id="sec-intro" class="section active">
+  <div class="lux-box">
+    <img src="logo.png" alt="Mishthi Chai" class="brand-logo" onerror="this.style.display='none'">
+    <p style="font-size:12px; letter-spacing:2px; font-weight:bold; color:#888;">कड़क • मीठी • खुशबूदार</p>
+    <p>Did you find the secret QR code inside your pack?</p>
+    <button class="gold-btn pulse-anim" onclick="startJourney()">YES, START EXPERIENCE</button>
+  </div>
+</div>
+
+<div id="sec-welcome" class="section">
+    <div class="lux-box">
+      <img src="logo.png" alt="Mishthi Chai" class="brand-logo" onerror="this.style.display='none'">
+      <h1 style="font-size: 40px;">🙏</h1>
+      <h2 style="color:var(--brand-green)">THANK YOU!</h2>
+      <p>We are delighted that you chose <b>Mishthi Chai</b>.</p>
+      <p style="font-size:12px; margin-top:10px;">Verifying your purchase...</p>
+      <div class="loader-line"><div id="loaderBar" class="loader-fill"></div></div>
+    </div>
+</div>
+
+<div id="sec-product" class="section">
+  <div class="lux-box">
+    <img src="logo.png" alt="Mishthi Chai" class="brand-logo" onerror="this.style.display='none'">
+    <h2>SELECT PACK</h2>
+    <p>Which pack did you purchase?</p>
+    
+    <button class="product-btn" onclick="handleProductSelect('250gm')">
+        <div><span style="font-weight:800">250gm Pack</span><br><small>MRP <span style="text-decoration:line-through">₹150</span> <b>₹120</b></small></div>
+        <span>👉</span>
+    </button>
+    
+    <button class="product-btn" onclick="handleProductSelect('1kg')">
+        <div><span style="font-weight:800">1kg Pack</span><br><small>MRP <span style="text-decoration:line-through">₹600</span> <b>₹450</b></small></div>
+        <span>👉</span>
+    </button>
+  </div>
+</div>
+
+<div id="sec-wheel" class="section">
+  <img src="logo.png" class="brand-logo" onerror="this.style.display='none'">
+  <h2 id="wheelTitle" style="color:var(--brand-yellow)">SPIN TO WIN</h2>
+  <div id="wheelContainer">
+    <div class="pointer"></div>
+    <canvas id="wheelCanvas" width="800" height="800"></canvas>
+  </div>
+  <button id="spinBtn" class="gold-btn pulse-anim" style="width:190px" onclick="spinNow()">SPIN NOW</button>
+</div>
+
+<div id="sec-form" class="section">
+  <div class="lux-box">
+    <img src="logo.png" alt="Mishthi Chai" class="brand-logo" onerror="this.style.display='none'">
+    <h2>CONGRATS!</h2>
+    <p id="wonDisplay" style="font-weight:800; color:var(--brand-yellow); margin-bottom:10px;"></p>
+    <div id="statusMsg"></div>
+    <input id="userName" type="text" placeholder="Full Name" autocomplete="name">
+    <input id="userPhone" type="tel" placeholder="Mobile (10 Digits)" inputmode="numeric" maxlength="10">
+    <input id="userEmail" type="email" placeholder="Email Address" autocomplete="email">
+    <button id="formBtn" class="gold-btn" onclick="handleAuth()">GET REWARD</button>
+  </div>
+</div>
+
+<div id="sec-final" class="section">
+  <div class="lux-box">
+    <img src="logo.png" alt="Mishthi Chai" class="brand-logo" onerror="this.style.display='none'">
+    <h2 style="color:var(--brand-green); margin-bottom:5px;">OFFER UNLOCKED!</h2>
+    
+    <div class="price-details">
+        <div class="price-line">
+            <span>Sale Price:</span>
+            <span id="displayOrig"></span>
+        </div>
+        <div class="price-line">
+            <span>Reward:</span>
+            <span id="displayOffer" style="font-weight:bold; color:var(--brand-yellow)"></span>
+        </div>
+        <div class="price-line">
+            <span>Benefit:</span>
+            <span id="displayDisc" style="color:red; font-weight:bold;"></span>
+        </div>
+        <div class="price-line total-line">
+            <span>PAYABLE:</span>
+            <span id="displayFinal"></span>
+        </div>
+    </div>
+
+    <div style="background:#f9f9f9; padding:10px; border-radius:10px; margin-top:10px;">
+        <p style="font-size:11px; font-weight:bold; color:#333; margin-bottom:5px;">SHOW THIS QR AT COUNTER</p>
+        <div id="qr-container"><div id="qrcode"></div></div>
+        <p style="font-size:11px; color:#555;">Staff will scan to verify your reward.</p>
+    </div>
+
+    <button class="gold-btn" style="margin-top:20px;" onclick="location.reload()">CLOSE</button>
+  </div>
+</div>
+
+<script>
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    const size = Math.random() * 5 + 2 + 'px';
+    p.style.width = size; p.style.height = size; p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = Math.random() * 15 + 10 + 's'; p.style.animationDelay = Math.random() * 5 + 's';
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbyYrL2VQuf_hV1CIJ6lVGs06ZgA8sWi1OAwSX4GO1uBMS9TMZX0dxPz8VgE8QneHwvU/exec";
+
+// UX Optimized labels with manual line breaks
+const REWARDS_250 = ["₹10 OFF", "₹20 OFF", "BOGO", "Free 250gm\nPack", "₹10 OFF", "₹20 OFF"];
+const REWARDS_1KG = ["Free\nBottle", "One Flavored\nTea", "250gm Tea\nPacket Free", "₹50 OFF", "₹30 OFF", "₹20 OFF"];
+
+let wonReward="", selectedPack=""; 
+
+function startJourney() {
+    showSection("sec-welcome");
+    setTimeout(() => { document.getElementById('loaderBar').style.width = "100%"; }, 100);
+    setTimeout(() => { showSection("sec-product"); }, 4000);
+}
+
+function handleProductSelect(pack) {
+    selectedPack = pack; 
+    localStorage.setItem("mishthi_pack_size", pack); 
+    let currentRewards = (pack === '250gm') ? REWARDS_250 : REWARDS_1KG;
+    document.getElementById('wheelTitle').innerText = pack + " SPIN"; 
+    showSection("sec-wheel"); 
+    drawWheel(currentRewards); 
+}
+
+function drawWheel(rewards) {
+  const canvas = document.getElementById("wheelCanvas");
+  const ctx = canvas.getContext("2d"); 
+  ctx.clearRect(0,0,800,800);
+  const total = rewards.length;
+  const arc = (2 * Math.PI) / total;
+
+  rewards.forEach((text, i) => {
+    const angle = i * arc;
+    
+    // Slice
+    ctx.beginPath();
+    ctx.fillStyle = i % 2 ? "#fdb913" : "#4cb60d";
+    ctx.moveTo(400, 400); 
+    ctx.arc(400, 400, 395, angle, angle + arc);
+    ctx.fill(); 
+    ctx.lineWidth = 6; ctx.strokeStyle = "#fff"; ctx.stroke();
+
+    // Text Label Logic
+    ctx.save(); 
+    ctx.translate(400, 400); 
+    ctx.rotate(angle + arc / 2);
+    
+    ctx.fillStyle = "#fff"; 
+    ctx.textAlign = "right"; 
+    ctx.textBaseline = "middle";
+
+    const lines = text.split('\n');
+    
+    // DYNAMIC FONT SIZE SYSTEM
+    // Single line gets a massive size; double line gets optimized medium size
+    let fontSize = lines.length > 1 ? 32 : 46; 
+    ctx.font = `900 ${fontSize}px Montserrat`; 
+
+    // Add shadow to make text pop against colors
+    ctx.shadowColor = "rgba(0,0,0,0.3)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+
+    lines.forEach((line, index) => {
+        // Balanced vertical offset for multi-line centering
+        const yOffset = (index - (lines.length - 1) / 2) * (fontSize + 8);
+        // Positioned 375px from center to maximize outer edge space
+        ctx.fillText(line, 375, yOffset); 
+    });
+
+    ctx.restore();
+  });
+
+  // UX Improvement: Large Center Cap
+  ctx.beginPath();
+  ctx.arc(400, 400, 45, 0, Math.PI * 2);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+  ctx.strokeStyle = "#fdb913";
+  ctx.lineWidth = 10;
+  ctx.stroke();
+}
+
+function spinNow() {
+  const btn = document.getElementById('spinBtn'); 
+  btn.disabled = true; 
+  btn.classList.remove('pulse-anim'); 
+  btn.innerText = "SPINNING...";
+  
+  let currentRewards = (selectedPack === '250gm') ? REWARDS_250 : REWARDS_1KG;
+  const rIdx = Math.floor(Math.random() * currentRewards.length);
+  wonReward = currentRewards[rIdx].replace('\n', ' '); 
+  const arcSize = 360 / currentRewards.length;
+  
+  const finalRot = 3600 + (270 - (rIdx * arcSize + arcSize / 2));
+  const canvas = document.getElementById("wheelCanvas");
+  canvas.style.transform = `rotate(${finalRot}deg)`;
+  
+  setTimeout(() => {
+    confetti({ colors: ['#fdb913', '#4cb60d'], particleCount: 150 });
+    document.getElementById('wonDisplay').innerText = "YOU WON: " + wonReward; 
+    showSection("sec-form"); 
+  }, 4100);
+}
+
+async function handleAuth() {
+  const name = document.getElementById("userName").value;
+  const phone = document.getElementById("userPhone").value.trim();
+  const email = document.getElementById("userEmail").value.trim();
+  const btn = document.getElementById("formBtn");
+  
+  if(!name || !phone || !email || phone.length !== 10) { showError("Enter valid details."); return; }
+  btn.innerText = "VERIFYING..."; btn.disabled = true;
+  
+  try {
+      const checkReq = await fetch(WEBHOOK_URL, { method: "POST", body: JSON.stringify({ action: "checkUser", phone: phone, email: email }) });
+      const checkData = await checkReq.json();
+      if (checkData.status === "EXIST") {
+          btn.disabled = false; btn.innerText = "GET REWARD";
+          showError(checkData.message); shakeBox(); return; 
+      }
+      btn.innerText = "SAVING...";
+      const saveReq = await fetch(WEBHOOK_URL, { method: "POST", body: JSON.stringify({ action: "submitForm", name, phone, email, reward: wonReward, pack_size: selectedPack }) });
+      const saveData = await saveReq.json();
+      if (saveData.status === "SUCCESS") {
+          localStorage.setItem("mishthi_phone", phone);
+          localStorage.setItem("mishthi_won_reward", wonReward);
+          confetti({ particleCount: 300 });
+          showFinalScreen(phone, wonReward);
+      } else {
+          btn.disabled = false; btn.innerText = "GET REWARD";
+          showError(saveData.message || "Error."); shakeBox();
+      }
+  } catch(e) { 
+      btn.disabled = false; btn.innerText = "GET REWARD";
+      showError("Connection Error. Try Again.");
+  }
+}
+
+function showFinalScreen(phone, rewardText) {
+    let basePrice = (selectedPack === '1kg') ? 450 : 120;
+    let discountAmount = 0;
+    let isFullFree = false;
+    
+    if(rewardText.includes("₹")) {
+        discountAmount = parseInt(rewardText.replace(/[^0-9]/g, ''));
+    } else if(rewardText.toLowerCase().includes("free 250gm pack")) {
+        discountAmount = 120;
+        isFullFree = true;
+    }
+    
+    const finalPrice = Math.max(0, basePrice - discountAmount);
+    document.getElementById("displayOrig").innerText = "₹" + basePrice;
+    document.getElementById("displayOffer").innerText = rewardText;
+    
+    if(isFullFree) {
+        document.getElementById("displayDisc").innerText = "FULL FREE";
+        document.getElementById("displayDisc").style.color = "green";
+    } else if(discountAmount > 0) {
+        document.getElementById("displayDisc").innerText = "- ₹" + discountAmount;
+        document.getElementById("displayDisc").style.color = "red";
+    } else {
+        document.getElementById("displayDisc").innerText = "+ GIFT ADDED";
+        document.getElementById("displayDisc").style.color = "#fdb913";
+    }
+    
+    document.getElementById("displayFinal").innerText = "₹" + finalPrice;
+    const staffLink = `${WEBHOOK_URL}?action=redeem&phone=${phone}&reward=${encodeURIComponent(rewardText)}`;
+    document.getElementById("qrcode").innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), { text: staffLink, width: 150, height: 150 });
+    showSection("sec-final");
+}
+
+function showError(msg) { const s=document.getElementById("statusMsg"); s.innerText=msg; s.style.opacity="1"; }
+function shakeBox(){ document.querySelector('.lux-box').animate([{ transform:'translateX(0)' },{ transform:'translateX(-10px)' },{ transform:'translateX(10px)' },{ transform:'translateX(0)' }],{ duration:300 }); }
+function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+</script>
+
+</body>
+</html>
