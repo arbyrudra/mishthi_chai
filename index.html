@@ -85,15 +85,12 @@ html, body {
     font-weight: 900; font-size: 20px; color: var(--brand-green); 
 }
 
-.pulse-anim { animation: pulse-yellow 2s infinite; }
-@keyframes pulse-yellow { 0% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(253, 185, 19, 0); } 100% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0); } }
-
-input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 10px; border: 1px solid #ddd; background: #f9f9f9; font-size: 16px; outline: none; font-family: 'Montserrat', sans-serif; }
-input:focus { border-color: var(--brand-yellow); background: #fff; }
-
 #wheelContainer { position: relative; margin: 15px 0; }
 #wheelCanvas { width: min(85vw, 340px); height: min(85vw, 340px); border: 6px solid var(--brand-yellow); border-radius: 50%; background: #fff; transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 .pointer { width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 24px solid var(--text-main); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 10; }
+
+input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 10px; border: 1px solid #ddd; background: #f9f9f9; font-size: 16px; outline: none; font-family: 'Montserrat', sans-serif; }
+input:focus { border-color: var(--brand-yellow); background: #fff; }
 
 h1, h2 { margin: 0 0 5px; font-weight: 900; color: var(--text-main); }
 p { margin: 5px 0; line-height: 1.5; color: #555; font-size: 14px; }
@@ -217,10 +214,10 @@ function createParticles() {
 }
 createParticles();
 
-const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbyYrL2VQuf_hV1CIJ6lVGs06ZgA8sWi1OAwSX4GO1uBMS9TMZX0dxPz8VgE8QneHwvU/exec";
+const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbykyichfuHPW5Wk6XWNO2ACucZyolJYhaY2gQfXXdWaZ9GWhcwpoqTt1-EFWGjLaw6E/exec";
 
-// UX Optimized labels with manual line breaks
-const REWARDS_250 = ["₹10 OFF", "₹20 OFF", "BOGO", "Free 250gm\nPack", "₹10 OFF", "₹20 OFF"];
+// UX Optimized labels
+const REWARDS_250 = ["₹10 OFF", "₹20 OFF", "Buy One\nGet One Free", "JACKPOT", "₹10 OFF", "₹20 OFF"];
 const REWARDS_1KG = ["Free\nBottle", "One Flavored\nTea", "250gm Tea\nPacket Free", "₹50 OFF", "₹30 OFF", "₹20 OFF"];
 
 let wonReward="", selectedPack=""; 
@@ -249,8 +246,6 @@ function drawWheel(rewards) {
 
   rewards.forEach((text, i) => {
     const angle = i * arc;
-    
-    // Slice
     ctx.beginPath();
     ctx.fillStyle = i % 2 ? "#fdb913" : "#4cb60d";
     ctx.moveTo(400, 400); 
@@ -258,39 +253,29 @@ function drawWheel(rewards) {
     ctx.fill(); 
     ctx.lineWidth = 6; ctx.strokeStyle = "#fff"; ctx.stroke();
 
-    // Text Label Logic
     ctx.save(); 
     ctx.translate(400, 400); 
     ctx.rotate(angle + arc / 2);
-    
     ctx.fillStyle = "#fff"; 
     ctx.textAlign = "right"; 
     ctx.textBaseline = "middle";
 
     const lines = text.split('\n');
-    
-    // DYNAMIC FONT SIZE SYSTEM
-    // Single line gets a massive size; double line gets optimized medium size
     let fontSize = lines.length > 1 ? 32 : 46; 
     ctx.font = `900 ${fontSize}px Montserrat`; 
 
-    // Add shadow to make text pop against colors
     ctx.shadowColor = "rgba(0,0,0,0.3)";
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
 
     lines.forEach((line, index) => {
-        // Balanced vertical offset for multi-line centering
         const yOffset = (index - (lines.length - 1) / 2) * (fontSize + 8);
-        // Positioned 375px from center to maximize outer edge space
         ctx.fillText(line, 375, yOffset); 
     });
-
     ctx.restore();
   });
 
-  // UX Improvement: Large Center Cap
   ctx.beginPath();
   ctx.arc(400, 400, 45, 0, Math.PI * 2);
   ctx.fillStyle = "#fff";
@@ -303,21 +288,25 @@ function drawWheel(rewards) {
 function spinNow() {
   const btn = document.getElementById('spinBtn'); 
   btn.disabled = true; 
-  btn.classList.remove('pulse-anim'); 
   btn.innerText = "SPINNING...";
   
   let currentRewards = (selectedPack === '250gm') ? REWARDS_250 : REWARDS_1KG;
   const rIdx = Math.floor(Math.random() * currentRewards.length);
   wonReward = currentRewards[rIdx].replace('\n', ' '); 
-  const arcSize = 360 / currentRewards.length;
   
+  // Logic: If user wins JACKPOT, convert internal value for storage
+  if (wonReward === "JACKPOT") {
+      wonReward = "Your 250gm Pack Is Fully Free";
+  }
+
+  const arcSize = 360 / currentRewards.length;
   const finalRot = 3600 + (270 - (rIdx * arcSize + arcSize / 2));
   const canvas = document.getElementById("wheelCanvas");
   canvas.style.transform = `rotate(${finalRot}deg)`;
   
   setTimeout(() => {
     confetti({ colors: ['#fdb913', '#4cb60d'], particleCount: 150 });
-    document.getElementById('wonDisplay').innerText = "YOU WON: " + wonReward; 
+    document.getElementById('wonDisplay').innerText = "YOU WON: " + (wonReward === "Your 250gm Pack Is Fully Free" ? "JACKPOT" : wonReward); 
     showSection("sec-form"); 
   }, 4100);
 }
@@ -326,19 +315,18 @@ async function handleAuth() {
   const name = document.getElementById("userName").value;
   const phone = document.getElementById("userPhone").value.trim();
   const email = document.getElementById("userEmail").value.trim();
-  const btn = document.getElementById("formBtn");
+  if(!name || phone.length !== 10) { showError("Enter valid details."); return; }
   
-  if(!name || !phone || !email || phone.length !== 10) { showError("Enter valid details."); return; }
-  btn.innerText = "VERIFYING..."; btn.disabled = true;
+  const btn = document.getElementById("formBtn");
+  btn.innerText = "SAVING..."; btn.disabled = true;
   
   try {
       const checkReq = await fetch(WEBHOOK_URL, { method: "POST", body: JSON.stringify({ action: "checkUser", phone: phone, email: email }) });
       const checkData = await checkReq.json();
       if (checkData.status === "EXIST") {
           btn.disabled = false; btn.innerText = "GET REWARD";
-          showError(checkData.message); shakeBox(); return; 
+          showError(checkData.message); return; 
       }
-      btn.innerText = "SAVING...";
       const saveReq = await fetch(WEBHOOK_URL, { method: "POST", body: JSON.stringify({ action: "submitForm", name, phone, email, reward: wonReward, pack_size: selectedPack }) });
       const saveData = await saveReq.json();
       if (saveData.status === "SUCCESS") {
@@ -348,11 +336,10 @@ async function handleAuth() {
           showFinalScreen(phone, wonReward);
       } else {
           btn.disabled = false; btn.innerText = "GET REWARD";
-          showError(saveData.message || "Error."); shakeBox();
+          showError("Error saving data.");
       }
   } catch(e) { 
-      btn.disabled = false; btn.innerText = "GET REWARD";
-      showError("Connection Error. Try Again.");
+      btn.disabled = false; showError("Connection Error.");
   }
 }
 
@@ -361,9 +348,10 @@ function showFinalScreen(phone, rewardText) {
     let discountAmount = 0;
     let isFullFree = false;
     
+    // Internal conversion for proper display on the final screen
     if(rewardText.includes("₹")) {
         discountAmount = parseInt(rewardText.replace(/[^0-9]/g, ''));
-    } else if(rewardText.toLowerCase().includes("free 250gm pack")) {
+    } else if(rewardText === "Your 250gm Pack Is Fully Free") {
         discountAmount = 120;
         isFullFree = true;
     }
@@ -391,7 +379,6 @@ function showFinalScreen(phone, rewardText) {
 }
 
 function showError(msg) { const s=document.getElementById("statusMsg"); s.innerText=msg; s.style.opacity="1"; }
-function shakeBox(){ document.querySelector('.lux-box').animate([{ transform:'translateX(0)' },{ transform:'translateX(-10px)' },{ transform:'translateX(10px)' },{ transform:'translateX(0)' }],{ duration:300 }); }
 function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
 </script>
 
