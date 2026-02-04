@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mishthi Chai - Visitor</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --brand-yellow: #fdb913;  
+  --brand-green: #4cb60d;   
+  --text-main: #333333;     
+  --text-error: #ff0000;    
+  --bg-gradient: radial-gradient(circle, #ffffff 0%, #fff8e1 60%, #faeab8 100%);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  overflow: hidden; background: var(--bg-gradient);
+  font-family: 'Montserrat', sans-serif; color: var(--text-main);
+}
+
+/* PARTICLES */
+#particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: hidden; }
+.particle { position: absolute; background: var(--brand-yellow); border-radius: 50%; opacity: 0.3; animation: floatUp linear infinite; }
+@keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+
+/* SECTIONS */
+.section { display: none; width: 100vw; height: 100vh; padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom); position: absolute; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 10; }
+.active { display: flex; }
+
+/* LUX BOX */
+.lux-box {
+  background: var(--glass-bg); padding: 25px 20px; border-radius: 22px;
+  border: 2px solid var(--brand-yellow); width: 100%; max-width: 360px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(253, 185, 19, 0.15);
+  opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  max-height: 90vh; overflow-y: auto;
+}
+.active .lux-box { opacity: 1; transform: translateY(0); }
+
+/* IMAGES */
+.brand-logo { 
+    max-width: 140px; 
+    max-height: 80px; 
+    margin-bottom: 20px; 
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+/* BUTTONS */
+.gold-btn {
+  width: 100%; background: var(--brand-yellow); border: none; padding: 16px;
+  border-radius: 12px; font-weight: 800; cursor: pointer; color: #000;
+  margin-top: 15px; font-size: 15px; letter-spacing: 1px; text-transform: uppercase;
+  transition: transform 0.2s, box-shadow 0.3s; box-shadow: 0 5px 15px rgba(253, 185, 19, 0.3);
+}
+.gold-btn:active { transform: scale(0.97); }
+.gold-btn:disabled { background: #e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; }
+
+/* PULSE */
+.pulse-anim { animation: pulse-yellow 2s infinite; }
+@keyframes pulse-yellow { 0% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(253, 185, 19, 0); } 100% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0); } }
+
+/* INPUTS */
+input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 10px; border: 1px solid #ddd; background: #f9f9f9; font-size: 16px; outline: none; font-family: 'Montserrat', sans-serif; }
+input:focus { border-color: var(--brand-yellow); background: #fff; }
+
+h1, h2 { margin: 0 0 5px; font-weight: 900; color: var(--text-main); }
+p { margin: 5px 0; line-height: 1.5; color: #555; font-size: 14px; }
+#statusMsgLead { font-size: 13px; min-height: 18px; color: var(--text-error); font-weight: 700; opacity: 0; transition: opacity 0.3s; }
+
+</style>
+</head>
+
+<body>
+
+<div id="particles"></div>
+
+<div id="sec-intro" class="section active">
+  <div class="lux-box">
+    <img src="logo.png" alt="MiSHTHi CHAi" class="brand-logo" onerror="this.style.display='none'">
+    <p style="font-size:12px; letter-spacing:2px; font-weight:bold; color:#888;">कड़क • मीठी • खुशबूदार</p>
+    <p>Welcome! Please join our community.</p>
+    <button class="gold-btn pulse-anim" onclick="startFlow()">ENTER</button>
+  </div>
+</div>
+
+<div id="sec-simple-form" class="section">
+    <div class="lux-box">
+      <img src="logo.png" alt="MiSHTHi CHAi" class="brand-logo" onerror="this.style.display='none'">
+      <h2>DETAILS PLEASE</h2>
+      <p>Stay updated with our latest offers.</p>
+      <div id="statusMsgLead"></div>
+      
+      <input id="leadName" type="text" placeholder="Full Name">
+      <input id="leadPhone" type="tel" placeholder="Mobile Number (10 Digits)" maxlength="10">
+      <input id="leadEmail" type="email" placeholder="Email Address">
+      
+      <button id="leadBtn" class="gold-btn" onclick="submitLead()">SUBMIT</button>
+    </div>
+</div>
+
+<div id="sec-simple-thanks" class="section">
+    <div class="lux-box">
+      <img src="logo.png" alt="MiSHTHi CHAi" class="brand-logo" onerror="this.style.display='none'">
+      <h1 style="font-size: 50px;">🙏</h1>
+      <h2 style="color:var(--brand-green);">THANK YOU!</h2>
+      
+      <div style="margin: 30px 0;">
+          <h3 style="color:#333; font-size: 24px; font-weight: 800; line-height: 1.4;">Thank you for visiting our store!</h3>
+          <p style="color:#777; margin-top:15px; font-size: 15px;">We hope you had a great experience with Mishthi Chai.</p>
+      </div>
+
+      <button class="gold-btn" onclick="location.reload()">CLOSE</button>
+    </div>
+</div>
+
+<script>
+// --- PARTICLES ---
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    const s = Math.random()*5+2+'px';
+    p.style.width=s; p.style.height=s; p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=Math.random()*15+10+'s'; p.style.animationDelay=Math.random()*5+'s';
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+// --- CONFIGURATION ---
+// ⚠️ REPLACE THIS WITH YOUR VISITOR SHEET URL
+const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbxv2MWzefc6tOnMY9_SwLmimRBZNbKPdVPVgJ55xQ33PCIBzCA6qeunhq89i3QtyC2pXA/exec";
+
+// --- FLOW LOGIC ---
+// Check if user already submitted data before
+window.onload = function() {
+    if(localStorage.getItem("mishthi_visitor_done")) { 
+        showSection("sec-simple-thanks"); 
+    }
+};
+
+function startFlow(){
+    if(localStorage.getItem("mishthi_visitor_done")) { 
+        showSection("sec-simple-thanks"); 
+    } else {
+        showSection("sec-simple-form");
+    }
+}
+
+// --- SUBMIT FUNCTION ---
+async function submitLead(){
+    const name = document.getElementById("leadName").value;
+    const phone = document.getElementById("leadPhone").value.trim();
+    const email = document.getElementById("leadEmail").value.trim();
+    const btn = document.getElementById("leadBtn");
+    const status = document.getElementById("statusMsgLead");
+    
+    status.style.opacity="0";
+    
+    // Validation
+    if(!name || !phone || !email || phone.length !== 10) { 
+        showError(status, "Please enter valid details."); 
+        shakeBox(); 
+        return; 
+    }
+    
+    btn.innerText="SAVING..."; 
+    btn.disabled=true;
+    
+    try {
+        const r = await fetch(WEBHOOK_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "submitLead",
+                name: name,
+                phone: phone,
+                email: email
+            })
+        });
+        
+        const d = await r.json();
+        btn.disabled = false;
+        
+        // 1. SUCCESS
+        if(d.status === "SAVED" || d.status === "SUCCESS"){
+            localStorage.setItem("mishthi_visitor_done", "true");
+            showSection("sec-simple-thanks");
+            createConfetti();
+        } 
+        // 2. DUPLICATE FOUND (EXIST)
+        else if (d.status === "EXIST") {
+            // Since there is no reward, we just show the thanks screen even if they exist
+            // to confirm their visit is noted/acknowledged.
+            localStorage.setItem("mishthi_visitor_done", "true");
+            showSection("sec-simple-thanks");
+        } 
+        // 3. GENERIC ERROR
+        else {
+             btn.innerText="SUBMIT"; 
+             showError(status, "Error saving data.");
+        }
+    } catch(e) { 
+        // If internet fails, show thanks anyway
+        console.log("Offline or Error:", e);
+        localStorage.setItem("mishthi_visitor_done", "true");
+        showSection("sec-simple-thanks");
+        createConfetti();
+    }
+}
+
+// --- UTILS ---
+function createConfetti() {
+    if (typeof confetti !== 'undefined') {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+}
+
+function showError(el, msg) { el.innerText=msg; el.style.opacity="1"; }
+function shakeBox(){ document.querySelector('.lux-box').animate([{ transform:'translateX(0)' },{ transform:'translateX(-10px)' },{ transform:'translateX(10px)' },{ transform:'translateX(0)' }],{ duration:300 }); }
+function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+</body>
+</html>
