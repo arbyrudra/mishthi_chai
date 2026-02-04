@@ -216,7 +216,7 @@ createParticles();
 
 const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbykyichfuHPW5Wk6XWNO2ACucZyolJYhaY2gQfXXdWaZ9GWhcwpoqTt1-EFWGjLaw6E/exec";
 
-// UX Optimized labels
+// --- REWARDS CONFIGURATION ---
 const REWARDS_250 = ["₹10 OFF", "₹20 OFF", "Buy One\nGet One Free", "JACKPOT", "₹10 OFF", "₹20 OFF"];
 const REWARDS_1KG = ["Free\nBottle", "One Flavored\nTea", "250gm Tea\nPacket Free", "₹50 OFF", "₹30 OFF", "₹20 OFF"];
 
@@ -285,22 +285,55 @@ function drawWheel(rewards) {
   ctx.stroke();
 }
 
+// --- NEW WEIGHTED LOGIC ---
+function getWeightedIndex(pack) {
+    const r = Math.random() * 100; // Generate 0-100
+    
+    if (pack === '250gm') {
+        // Visual Array: ["₹10 OFF"(0), "₹20 OFF"(1), "BOGO"(2), "JACKPOT"(3), "₹10 OFF"(4), "₹20 OFF"(5)]
+        // Logic: Jackpot 5%, BOGO 10%, Cash 85%
+        
+        if (r < 5) return 3; // JACKPOT (5%)
+        if (r < 15) return 2; // BOGO (10%) -> r is between 5 and 15
+        
+        // Remaining 85% split among cash indices
+        const cashIndices = [0, 1, 4, 5];
+        return cashIndices[Math.floor(Math.random() * cashIndices.length)];
+    } 
+    else {
+        // Visual Array: ["Free Bottle"(0), "One Flavored Tea"(1), "250gm Tea Packet"(2), "₹50 OFF"(3), "₹30 OFF"(4), "₹20 OFF"(5)]
+        // Logic: Bottle 5%, Flavor Tea 7.5%, Tea Packet 7.5%, Cash 80%
+        
+        if (r < 5) return 0; // Free Bottle (5%)
+        if (r < 12.5) return 1; // Flavored Tea (7.5%)
+        if (r < 20) return 2; // 250gm Packet (7.5%)
+        
+        // Remaining 80% split among cash indices
+        const cashIndices = [3, 4, 5]; 
+        return cashIndices[Math.floor(Math.random() * cashIndices.length)];
+    }
+}
+
 function spinNow() {
   const btn = document.getElementById('spinBtn'); 
   btn.disabled = true; 
   btn.innerText = "SPINNING...";
   
   let currentRewards = (selectedPack === '250gm') ? REWARDS_250 : REWARDS_1KG;
-  const rIdx = Math.floor(Math.random() * currentRewards.length);
+  
+  // Use weighted logic instead of pure random
+  const rIdx = getWeightedIndex(selectedPack);
+  
   wonReward = currentRewards[rIdx].replace('\n', ' '); 
   
-  // Logic: If user wins JACKPOT, convert internal value for storage
   if (wonReward === "JACKPOT") {
       wonReward = "Your 250gm Pack Is Fully Free";
   }
 
   const arcSize = 360 / currentRewards.length;
+  // Calculate rotation to land exactly on the chosen weighted index
   const finalRot = 3600 + (270 - (rIdx * arcSize + arcSize / 2));
+  
   const canvas = document.getElementById("wheelCanvas");
   canvas.style.transform = `rotate(${finalRot}deg)`;
   
