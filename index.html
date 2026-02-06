@@ -13,7 +13,7 @@
 :root {
   --brand-yellow: #fdb913;  
   --brand-green: #4cb60d;   
-  --text-main: #333333;     
+  --text-main: #333333;      
   --text-error: #ff0000;    
   --bg-gradient: radial-gradient(circle, #ffffff 0%, #fff8e1 60%, #faeab8 100%);
   --glass-bg: rgba(255, 255, 255, 0.95);
@@ -285,18 +285,22 @@ function drawWheel(rewards) {
   ctx.stroke();
 }
 
-// --- NEW WEIGHTED LOGIC ---
+// --- NEW WEIGHTED LOGIC UPDATED ---
 function getWeightedIndex(pack) {
     const r = Math.random() * 100; // Generate 0-100
     
     if (pack === '250gm') {
         // Visual Array: ["₹10 OFF"(0), "₹20 OFF"(1), "BOGO"(2), "JACKPOT"(3), "₹10 OFF"(4), "₹20 OFF"(5)]
-        // Logic: Jackpot 5%, BOGO 10%, Cash 85%
         
-        if (r < 5) return 3; // JACKPOT (5%)
-        if (r < 15) return 2; // BOGO (10%) -> r is between 5 and 15
+        // --- UPDATED LOGIC FOR 250GM ---
+        // Jackpot = 10%
+        // BOGO = 20%
+        // Cash (₹10/₹20) = 70%
+
+        if (r < 10) return 3; // JACKPOT (10%)
+        if (r < 30) return 2; // BOGO (20%) -> Because 10 + 20 = 30
         
-        // Remaining 85% split among cash indices
+        // Remaining 70% split among cash indices
         const cashIndices = [0, 1, 4, 5];
         return cashIndices[Math.floor(Math.random() * cashIndices.length)];
     } 
@@ -417,4 +421,3 @@ function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.cla
 
 </body>
 </html>
-
