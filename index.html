@@ -13,7 +13,7 @@
 :root {
   --brand-yellow: #fdb913;  
   --brand-green: #4cb60d;   
-  --text-main: #333333;      
+  --text-main: #333333;     
   --text-error: #ff0000;    
   --bg-gradient: radial-gradient(circle, #ffffff 0%, #fff8e1 60%, #faeab8 100%);
   --glass-bg: rgba(255, 255, 255, 0.95);
@@ -285,34 +285,26 @@ function drawWheel(rewards) {
   ctx.stroke();
 }
 
-// --- NEW WEIGHTED LOGIC UPDATED ---
+// --- UPDATED WEIGHTED LOGIC ---
 function getWeightedIndex(pack) {
     const r = Math.random() * 100; // Generate 0-100
     
     if (pack === '250gm') {
-        // Visual Array: ["₹10 OFF"(0), "₹20 OFF"(1), "BOGO"(2), "JACKPOT"(3), "₹10 OFF"(4), "₹20 OFF"(5)]
+        // Visual Array: 0:₹10, 1:₹20, 2:BOGO, 3:JACKPOT, 4:₹10, 5:₹20
         
-        // --- UPDATED LOGIC FOR 250GM ---
-        // Jackpot = 10%
-        // BOGO = 20%
-        // Cash (₹10/₹20) = 70%
-
-        if (r < 10) return 3; // JACKPOT (10%)
-        if (r < 30) return 2; // BOGO (20%) -> Because 10 + 20 = 30
+        if (r < 2.5) return 3;    // JACKPOT (2.5%)
+        if (r < 5.0) return 2;    // BOGO (2.5%)
         
-        // Remaining 70% split among cash indices
+        // Remaining 95% split between ₹10 and ₹20 indices (indices 0, 1, 4, 5)
         const cashIndices = [0, 1, 4, 5];
         return cashIndices[Math.floor(Math.random() * cashIndices.length)];
     } 
     else {
-        // Visual Array: ["Free Bottle"(0), "One Flavored Tea"(1), "250gm Tea Packet"(2), "₹50 OFF"(3), "₹30 OFF"(4), "₹20 OFF"(5)]
-        // Logic: Bottle 5%, Flavor Tea 7.5%, Tea Packet 7.5%, Cash 80%
-        
+        // Logic for 1KG Pack
         if (r < 5) return 0; // Free Bottle (5%)
         if (r < 12.5) return 1; // Flavored Tea (7.5%)
         if (r < 20) return 2; // 250gm Packet (7.5%)
         
-        // Remaining 80% split among cash indices
         const cashIndices = [3, 4, 5]; 
         return cashIndices[Math.floor(Math.random() * cashIndices.length)];
     }
@@ -325,9 +317,7 @@ function spinNow() {
   
   let currentRewards = (selectedPack === '250gm') ? REWARDS_250 : REWARDS_1KG;
   
-  // Use weighted logic instead of pure random
   const rIdx = getWeightedIndex(selectedPack);
-  
   wonReward = currentRewards[rIdx].replace('\n', ' '); 
   
   if (wonReward === "JACKPOT") {
@@ -335,7 +325,6 @@ function spinNow() {
   }
 
   const arcSize = 360 / currentRewards.length;
-  // Calculate rotation to land exactly on the chosen weighted index
   const finalRot = 3600 + (270 - (rIdx * arcSize + arcSize / 2));
   
   const canvas = document.getElementById("wheelCanvas");
@@ -385,7 +374,6 @@ function showFinalScreen(phone, rewardText) {
     let discountAmount = 0;
     let isFullFree = false;
     
-    // Internal conversion for proper display on the final screen
     if(rewardText.includes("₹")) {
         discountAmount = parseInt(rewardText.replace(/[^0-9]/g, ''));
     } else if(rewardText === "Your 250gm Pack Is Fully Free") {
